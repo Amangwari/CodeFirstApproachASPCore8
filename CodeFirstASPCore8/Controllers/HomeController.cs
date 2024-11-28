@@ -36,12 +36,14 @@ namespace CodeFirstASPCore8.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Student std)
         {
             if (ModelState.IsValid)
             {
                 await studentDb.Students.AddAsync(std);
                 await studentDb.SaveChangesAsync();
+                TempData["insert_success"] = "Inserted..."; // single display msg
                 return RedirectToAction("Index", "Home");
             }
             return View(std);
@@ -71,14 +73,67 @@ namespace CodeFirstASPCore8.Controllers
                 return NotFound();
             }
             var stdData = await studentDb.Students.FindAsync(id);
-            await studentDb.Students.ExecuteUpdateAsync(stdData);
-            await studentDb.SaveChangesAsync();
-            return RedirectToAction("Index", "Home");
+            if (stdData == null)
+            {
+                return NotFound();
+            }
+
+            return View(stdData);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int? id, Student std)
+        {
+            if(id != std.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                studentDb.Update(std);
+                await studentDb.SaveChangesAsync();
+                TempData["insert_edit"] = "Changes saved successfully.";
+                return RedirectToAction("Index", "Home");
+            }
+            return View(std);
+        }
+
+
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null || studentDb.Students == null)
+            {
+                return NotFound();
+            }
+
+            var stdData = await studentDb.Students.FirstOrDefaultAsync(x => x.Id == id);
+
             if (stdData == null)
             {
                 return NotFound();
             }
             return View(stdData);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int? id)
+        {
+            if (id == null || studentDb.Students == null)
+            {
+                return NotFound();
+            }
+            var stdData = await studentDb.Students.FindAsync(id);
+            if (stdData != null)
+            {
+                studentDb.Remove(stdData);
+            }
+            await studentDb.SaveChangesAsync();
+            TempData["insert_delete"] = "Deleted successfully.";
+            return RedirectToAction("Index", "Home");
+
         }
 
         public IActionResult Privacy()

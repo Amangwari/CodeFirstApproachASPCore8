@@ -9,6 +9,37 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+@{
+    string messageKey = null;
+
+    if (TempData["insert_success"] != null)
+    {
+        messageKey = "insert_success";
+    }
+    else if (TempData["insert_edit"] != null)
+    {
+        messageKey = "insert_edit";
+    } 
+    else if (TempData["insert_delete"] != null)
+    {
+        messageKey = "insert_delete";
+    }
+
+    switch (messageKey)
+    {
+        case "insert_success":
+        case "insert_edit":
+        case "insert_delete":
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Success!</strong> @TempData[messageKey]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            break;
+        default:
+            break;
+    }
+}
 <table class="table">
     <thead>
         <tr>
